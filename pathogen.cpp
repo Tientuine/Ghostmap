@@ -43,16 +43,16 @@ public:
 
 private:
 	std::string name;
-	//static std::mt19937 rng;
-	static std::default_random_engine rng;
+	static std::mt19937 rng;
+	//static std::default_random_engine rng;
 	std::bernoulli_distribution pcatch;
 	std::bernoulli_distribution pdie;
 	short kE;
 	short kI;
 };
 
-//std::mt19937 Pathogen::rng { std::random_device()() };
-std::default_random_engine Pathogen::rng { std::random_device()() };
+std::mt19937 Pathogen::rng { std::random_device()() };
+//std::default_random_engine Pathogen::rng { std::random_device()() };
 
 using GridMap = std::vector<std::vector<Host>>;
 
@@ -70,27 +70,41 @@ int isExposed (int hi, int hj, GridMap const& m, Pathogen p)
 	return count;
 }
 
+
+
 GridMap computeNext (GridMap const& m, Pathogen p)
 {
 	GridMap m_next { m };
-
-	for (auto i = 0u; i < m.size(); ++i) {
+	int N = m.size();
+	int M = m[0].size();
+	for (auto i = 0; i < N; ++i) {
 		auto& row = m[i];
-		for (auto j = 0u; j < row.size(); ++j) {
+		for (auto j = 0; j < M; ++j) {
 			auto& cell = row[j];
 			auto& cellnext = m_next[i][j];
-			if (p.susceptible(cell)) {
-				int exposure = isExposed(i, j, m, p);
-				for (auto k = 0; k < exposure; ++k) {
-					if (p.catches()) {
-						++cellnext;
-						break;
-					}
-				}
-			} else if (p.exposed(cell)) {
+			//if (p.susceptible(cell)) {
+			//	int exposure = isExposed(i, j, m, p);
+			//	for (auto k = 0; k < exposure; ++k) {
+			//		if (p.catches()) {
+			//			++cellnext;
+			//			break;
+			//		}
+			//	}
+			//} else if (p.exposed(cell)) {
+			if (p.exposed(cell)) {
 				++cellnext;
 			} else if (p.infectious(cell)) {
 				++cellnext;
+				for (auto hi = std::max(0, i - 1); hi <= std::min(i + 1, N - 1); ++hi) {
+					for (auto hj = std::max(0, j - 1); hj <= std::min(j + 1, M - 1); ++hj) {
+						if (p.susceptible(m_next[hi][hj])) {
+							if (p.catches()) {
+								++m_next[hi][hj];
+							}
+						}
+					}
+				}
+				
 				if (!p.infectious(cellnext)) {
 					if (p.dies()) {
 						cellnext = -1;
@@ -177,15 +191,10 @@ int main(int argc, char** argv)
 	auto t = 0u;
 	while (countInfected(m, ebola) > 0 && t++ < T) {
 		m = computeNext(m, ebola);
-		//std::cout << i << std::endl;
-		//printMap(m, ebola);
-		//std::cerr << "******************************************************\n";
 	}
 	printMap(m, ebola);
 	std::cout << t << ' ' << NCOMPS << ' ' << NRANDS << std::endl;
-	//std::cout << std::endl;
 
-	//std::cin.get();
 	return 0;
 }
 
