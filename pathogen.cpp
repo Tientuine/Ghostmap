@@ -23,23 +23,24 @@
 // infected = [kE+1,kE+kI]
 // recovered = -2
 // deceased = -1
-using Host = short;
+using Host = std::pair<short,short>;
 
 unsigned long NCOMPS = 0;
 unsigned long NRANDS = 0;
 
 class Pathogen {
 public:
-	Pathogen(std::string name, double pE, double pD, short kE, short kI)
-		: name(name), pcatch(pE), pdie(pD), kE(kE), kI(kE+kI) {}
-	bool susceptible (Host h) { ++NCOMPS; return h ==  0; }
-	bool deceased    (Host h) { ++NCOMPS; return h == -1; }
-	bool recovered   (Host h) { ++NCOMPS; return h == -2; }
-	bool exposed     (Host h) { ++NCOMPS; return 0  < h && h <= kE; }
-	bool infectious  (Host h) { ++NCOMPS; return kE < h && h <= kI; }
+	Pathogen(std::string name = "Ebola", double pE = 0.005, double pD = 0.5, short minE = 2, short kE = 9, short kI = 9)
+		: name(name), pcatch(pE), pdie(pD), dist(1.0/(kE-minE+1)), minE(minE), kI(kI) {}
+	bool susceptible (Host const& h) { ++NCOMPS; return h.first ==  0; }
+	bool deceased    (Host const& h) { ++NCOMPS; return h.first == -1; }
+	bool recovered   (Host const& h) { ++NCOMPS; return h.first == -2; }
+	bool exposed     (Host const& h) { ++NCOMPS; return 0 < h.first && h.first <= h.second; }
+	bool infectious  (Host const& h) { ++NCOMPS; return h.second < h.first && h.first <= (h.second + kI); }
 
 	bool catches() { ++NRANDS; return pcatch(rng); }
 	bool dies() { ++NRANDS; return pdie(rng); }
+	int incubation() { ++NRANDS; return minE + dist(rng); }
 
 private:
 	std::string name;
@@ -47,6 +48,8 @@ private:
 	//static std::default_random_engine rng;
 	std::bernoulli_distribution pcatch;
 	std::bernoulli_distribution pdie;
+	std::geometric_distribution<> dist;
+	short minE;
 	short kE;
 	short kI;
 };
@@ -82,24 +85,17 @@ GridMap computeNext (GridMap const& m, Pathogen p)
 		for (auto j = 0; j < M; ++j) {
 			auto& cell = row[j];
 			auto& cellnext = m_next[i][j];
-			//if (p.susceptible(cell)) {
-			//	int exposure = isExposed(i, j, m, p);
-			//	for (auto k = 0; k < exposure; ++k) {
-			//		if (p.catches()) {
-			//			++cellnext;
-			//			break;
-			//		}
-			//	}
-			//} else if (p.exposed(cell)) {
 			if (p.exposed(cell)) {
-				++cellnext;
+				++(cellnext.first);
 			} else if (p.infectious(cell)) {
-				++cellnext;
+				++(cellnext.first);
 				for (auto hi = std::max(0, i - 1); hi <= std::min(i + 1, N - 1); ++hi) {
 					for (auto hj = std::max(0, j - 1); hj <= std::min(j + 1, M - 1); ++hj) {
-						if (p.susceptible(m_next[hi][hj])) {
+						auto& neighbor = m_next[hi][hj];
+						if (p.susceptible(neighbor)) {
 							if (p.catches()) {
-								++m_next[hi][hj];
+								neighbor.second = p.incubation();
+								++(neighbor.first);
 							}
 						}
 					}
@@ -107,9 +103,9 @@ GridMap computeNext (GridMap const& m, Pathogen p)
 				
 				if (!p.infectious(cellnext)) {
 					if (p.dies()) {
-						cellnext = -1;
+						cellnext.first = -1;
 					} else {
-						cellnext = -2;
+						cellnext.first = -2;
 					}
 				}
 			}
@@ -150,7 +146,9 @@ void seedDisease (GridMap& m, Pathogen p, int count) {
 		auto k = d(gen);
 		auto i = k / m.size();
 		auto j = k % m.size();
-		m[i][j] = 1;
+		auto& cell = m[i][j];
+		cell.second = p.incubation();
+		cell.first = 1;
 	}
 }
 
@@ -173,15 +171,16 @@ int main(int argc, char** argv)
 	unsigned const T = std::atoi(argv[2]);
 	double PT = std::atof(argv[3]);
 	double PD = std::atof(argv[4]);
-	short const KE = std::atoi(argv[5]);
-	short const KI = std::atoi(argv[6]);
-	int const S = std::atoi(argv[7]);
+	short const ME = std::atoi(argv[5]);
+	short const KE = std::atoi(argv[6]);
+	short const KI = std::atoi(argv[7]);
+	int const S = std::atoi(argv[8]);
 
 	std::srand(std::time(nullptr));
 
-	GridMap minit { N, std::vector<Host>( N, 0 ) };
+	GridMap minit { N, std::vector<Host>( N, {0,0} ) };
 
-	Pathogen ebola { "Ebola-like", PT, PD, KE, KI };
+	Pathogen ebola { "Ebola-like", PT, PD, ME, KE, KI };
 
 	seedDisease(minit, ebola, S);
 
@@ -197,15 +196,4 @@ int main(int argc, char** argv)
 
 	return 0;
 }
-
-//0000000000000000
-//0000000000000001
-//0000000000011111
-//0000001111111111
-//1111111111111110
-//1111111111111111
-
-// 0000111110000000 - mask for kI?
-// 0000000001111100 - mask for kE?
-
 
