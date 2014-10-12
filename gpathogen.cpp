@@ -27,39 +27,43 @@
 // infected = [kE+1,kE+kI]
 // recovered = -2
 // deceased = -1
-using Host = std::tuple<int8_t,int8_t,int8_t,int8_t>;
+using Host = std::tuple<int8_t,int8_t,int8_t>;
 
 class Pathogen {
 public:
 	Pathogen(std::string name = "Ebola", double pE = 0.005, double pD = 0.5, int8_t minE = 2, int8_t kE = 9, int8_t minI = 7, int8_t kI = 9, int8_t kT = 1, int8_t kQ = 1)
 		: name(name), pcatch(pE), pdie(pD), edist(1.0/(kE-minE+1)), idist(1.0/(kI-minI+1)), ndist(1.0/kT), minE(minE), minI(minI), timeQ(kQ) {}
-	bool isSusceptible (Host const& h) { return std::get<0>(h) ==  0; }
-	bool isDeceased    (Host const& h) { return std::get<0>(h) == -1; }
-	bool isRecovered   (Host const& h) { return std::get<0>(h) == -2; }
-	bool isExposed     (Host const& h) { return std::get<0>(h) > 0; }
-	bool isInfectious  (Host const& h) { return std::get<0>(h) > std::get<1>(h); }
-	bool hasRunCourse  (Host const& h) { return std::get<0>(h) > std::get<2>(h); }
-	bool  detected (Host const& h) { return std::get<0>(h) > (std::get<1>(h) + timeQ); }
+	bool isSusceptible (Host const& h) { return std::get<0>(h) == 0; }
+	bool isExposed     (Host const& h) { return std::get<0>(h) == 1; }
+	bool isInfectious  (Host const& h) { return std::get<0>(h) == 2; }
+	bool hasRunCourse  (Host const& h) { return std::get<0>(h) == 3; }
+	bool isRecovered   (Host const& h) { return std::get<0>(h) == 4; }
+	bool isDeceased    (Host const& h) { return std::get<0>(h) == 5; }
+	bool detected (Host const& h) { return isInfectious(h) && std::get<1>(h) < minI; }
 
 	void infect (Host& h)
 	{
 		std::get<0>(h) = 1;
 		std::get<1>(h) = incubationPeriod();
-		std::get<2>(h) = std::get<1>(h) + infectionPeriod();
 	}
 	void worsen (Host& h)
 	{
-		++std::get<0>(h);
-		if (hasRunCourse(h)) {
-			if (dies()) {
-				kill(h);
+		//std::cerr << '.';
+		if (--std::get<1>(h) == 0) {
+			++std::get<0>(h);
+			if (hasRunCourse(h)) {
+				if (dies()) {
+					kill(h);
+				} else {
+					recover(h);
+				}
 			} else {
-				recover(h);
+				std::get<1>(h) = infectionPeriod();
 			}
 		}
 	}
-	void kill   (Host& h) { std::get<0>(h) = -1; }
-	void recover(Host& h) { std::get<0>(h) = -2; }
+	void recover(Host& h) { std::get<0>(h) = 4; }
+	void kill   (Host& h) { std::get<0>(h) = 5; }
 
 	bool  catches()   { return pcatch(rng); }
 	bool  dies()      { return pdie(rng); }
@@ -97,18 +101,18 @@ GridMap computeNext (GridMap const& m, Pathogen p)
 			auto& cellnext = m_next[i][j];
 			if (p.isExposed(cell)) {
 				p.worsen(cellnext);
-				if (p.isInfectious(cell)) {
-					if (p.detected(cell)) {
-						std::get<3>(cellnext) = std::max(std::get<3>(cellnext), (int8_t)1);
-					}
-					auto hk = std::get<3>(cellnext);
-					for (auto hi = std::max(0, i - hk); hi <= std::min(i + hk, N - 1); ++hi) {
-						for (auto hj = std::max(0, j - hk); hj <= std::min(j + hk, M - 1); ++hj) {
-							auto& neighbor = m_next[hi][hj];
-							if (p.isSusceptible(neighbor)) {
-								if (p.catches()) {
-									p.infect(neighbor);
-								}
+			} else if (p.isInfectious(cell)) {
+				p.worsen(cellnext);
+				if (p.detected(cell)) {
+					std::get<2>(cellnext) = 0;
+				}
+				auto hk = std::get<2>(cellnext);
+				for (auto hi = std::max(0, i - hk); hi <= std::min(i + hk, N - 1); ++hi) {
+					for (auto hj = std::max(0, j - hk); hj <= std::min(j + hk, M - 1); ++hj) {
+						auto& neighbor = m_next[hi][hj];
+						if (p.isSusceptible(neighbor)) {
+							if (p.catches()) {
+								p.infect(neighbor);
 							}
 						}
 					}
@@ -262,7 +266,7 @@ init( int h, int w )
     }
 
     // Load shaders and use the resulting shader program
-    GLuint program = InitShader( "vshader4.glsl", "fshader.glsl" );
+    GLuint program = InitShader( "vshader.glsl", "fshader.glsl" );
     glUseProgram( program );
 
     // Create a vertex array object
@@ -289,7 +293,7 @@ init( int h, int w )
     // Initialize the vertex position attribute from the vertex shader    
     GLuint sloc = glGetAttribLocation( program, "vState" );
     glEnableVertexAttribArray( sloc );
-    glVertexAttribIPointer( sloc, 4, GL_BYTE, 0, BUFFER_OFFSET(0) );
+    glVertexAttribIPointer( sloc, 3, GL_BYTE, 0, BUFFER_OFFSET(0) );
 
     mat4 projection = Ortho2D(0, w, 0, h);
     GLuint projection_loc = glGetUniformLocation(program, "projection");
@@ -335,10 +339,10 @@ void update( int t )
 
 void resetMap()
 {
-	m = { m.size(), std::vector<Host>( m[0].size(), std::make_tuple( 0, 0, 0, 0 ) ) };
+	m = { m.size(), std::vector<Host>( m[0].size(), std::make_tuple( 0, 0, 0 ) ) };
 	for (auto& row : m) {
 		for (auto& cell : row) {
-			std::get<3>(cell) = ebola.numNeighbors();
+			std::get<2>(cell) = ebola.numNeighbors();
 		}
 	}
 	seedDisease(m, ebola, S);
@@ -379,10 +383,10 @@ main( int argc, char **argv )
 
 	ebola = { "Ebola-like", PT, PD, ME, KE, MI, KI, KT };
 
-	m = { N, std::vector<Host>( N, std::make_tuple( 0, 0, 0, 0 ) ) };
+	m = { N, std::vector<Host>( N, std::make_tuple( 0, 0, 0 ) ) };
 	for (auto& row : m) {
 		for (auto& cell : row) {
-			std::get<3>(cell) = ebola.numNeighbors();
+			std::get<2>(cell) = ebola.numNeighbors();
 		}
 	}
 
