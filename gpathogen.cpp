@@ -26,22 +26,23 @@
 // infected = [kE+1,kE+kI]
 // recovered = -2
 // deceased = -1
-using Host = std::tuple<short,short,short>;
+using Host = std::tuple<short,short,short,short>;
 
 class Pathogen {
 public:
-        Pathogen(std::string name = "Ebola", double pE = 0.005, double pD = 0.5, short minE = 2, short kE = 9, short minI = 7, short kI = 9)
-                : name(name), pcatch(pE), pdie(pD), edist(1.0/(kE-minE+1)), idist(1.0/(kI-minI+1)), minE(minE), minI(minI) {}
+        Pathogen(std::string name = "Ebola", double pE = 0.005, double pD = 0.5, short minE = 2, short kE = 9, short minI = 7, short kI = 9, short kT = 1)
+                : name(name), pcatch(pE), pdie(pD), edist(1.0/(kE-minE+1)), idist(1.0/(kI-minI+1)), ndist(1.0/kT), minE(minE), minI(minI) {}
         bool susceptible (Host const& h) { return std::get<0>(h) ==  0; }
         bool deceased    (Host const& h) { return std::get<0>(h) == -1; }
         bool recovered   (Host const& h) { return std::get<0>(h) == -2; }
         bool exposed     (Host const& h) { return 0 < std::get<0>(h) && std::get<0>(h) <= std::get<1>(h); }
         bool infectious  (Host const& h) { return std::get<1>(h) < std::get<0>(h) && std::get<0>(h) <= (std::get<1>(h) + std::get<2>(h)); }
 
-        bool catches()   { return pcatch(rng); }
-        bool dies()      { return pdie(rng); }
-        int  incubates() { return minE + edist(rng); }
-        int  infects()   { return minI + idist(rng); }
+        bool  catches()   { return pcatch(rng); }
+        bool  dies()      { return pdie(rng); }
+        short incubates() { return minE + edist(rng); }
+        short infects()   { return minI + idist(rng); }
+	short numNeighbors() { return 1 + ndist(rng); }
 
 private:
         std::string name;
@@ -51,10 +52,9 @@ private:
         std::bernoulli_distribution pdie;
         std::geometric_distribution<> edist;
         std::geometric_distribution<> idist;
+	std::geometric_distribution<> ndist;
         short minE;
         short minI;
-        //short kE;
-        //short kI;
 };
 
 std::mt19937 Pathogen::rng { std::random_device()() };
@@ -89,8 +89,9 @@ GridMap computeNext (GridMap const& m, Pathogen p)
                                 ++std::get<0>(cellnext);
                         } else if (p.infectious(cell)) {
                                 ++std::get<0>(cellnext);
-                                for (auto hi = std::max(0, i - 1); hi <= std::min(i + 1, N - 1); ++hi) {
-                                        for (auto hj = std::max(0, j - 1); hj <= std::min(j + 1, M - 1); ++hj) {
+				auto hk = std::get<3>(cellnext);
+                                for (auto hi = std::max(0, i - hk); hi <= std::min(i + hk, N - 1); ++hi) {
+                                        for (auto hj = std::max(0, j - hk); hj <= std::min(j + hk, M - 1); ++hj) {
                                                 auto& neighbor = m_next[hi][hj];
                                                 if (p.susceptible(neighbor)) {
                                                         if (p.catches()) {
@@ -258,7 +259,7 @@ init( int h, int w )
     }
 
     // Load shaders and use the resulting shader program
-    GLuint program = InitShader( "vshader3.glsl", "fshader.glsl" );
+    GLuint program = InitShader( "vshader4.glsl", "fshader.glsl" );
     glUseProgram( program );
 
     // Create a vertex array object
@@ -285,7 +286,7 @@ init( int h, int w )
     // Initialize the vertex position attribute from the vertex shader    
     GLuint sloc = glGetAttribLocation( program, "vState" );
     glEnableVertexAttribArray( sloc );
-    glVertexAttribIPointer( sloc, 3, GL_SHORT, 0, BUFFER_OFFSET(0) );
+    glVertexAttribIPointer( sloc, 4, GL_SHORT, 0, BUFFER_OFFSET(0) );
 
     mat4 projection = Ortho2D(0, w, 0, h);
     GLuint projection_loc = glGetUniformLocation(program, "projection");
@@ -331,7 +332,12 @@ void update( int t )
 
 void resetMap()
 {
-	m = { m.size(), std::vector<Host>( m[0].size(), std::make_tuple( 0, 0, 0 ) ) };
+	m = { m.size(), std::vector<Host>( m[0].size(), std::make_tuple( 0, 0, 0, 0 ) ) };
+	for (auto& row : m) {
+		for (auto& cell : row) {
+			std::get<3>(cell) = ebola.numNeighbors();
+		}
+	}
 	seedDisease(m, ebola, S);
 	glutTimerFunc( 17, update, 0 );
 }
@@ -363,14 +369,20 @@ main( int argc, char **argv )
         short const KE = std::atoi(argv[6]);
         short const MI = std::atoi(argv[7]);
         short const KI = std::atoi(argv[8]);
-        S = std::atoi(argv[9]);
-	M = std::atoi(argv[10]);
+	short const KT = std::atoi(argv[9]);
+        S = std::atoi(argv[10]);
+	M = std::atoi(argv[11]);
 
 	std::srand(std::time(nullptr));
 
-	m = { N, std::vector<Host>( N, std::make_tuple( 0, 0, 0 ) ) };
+	ebola = { "Ebola-like", PT, PD, ME, KE, MI, KI, KT };
 
-	ebola = { "Ebola-like", PT, PD, ME, KE, MI, KI };
+	m = { N, std::vector<Host>( N, std::make_tuple( 0, 0, 0, 0 ) ) };
+	for (auto& row : m) {
+		for (auto& cell : row) {
+			std::get<3>(cell) = ebola.numNeighbors();
+		}
+	}
 
 	seedDisease(m, ebola, S);
 
