@@ -33,13 +33,14 @@ class Pathogen {
 public:
 	Pathogen(std::string name = "Ebola", double pE = 0.005, double pD = 0.5, int8_t minE = 2, int8_t kE = 9, int8_t minI = 7, int8_t kI = 9, int8_t kT = 1, int8_t kQ = 1)
 		: name(name), pcatch(pE), pdie(pD), edist(1.0/(kE-minE+1)), idist(1.0/(kI-minI+1)), ndist(1.0/kT), minE(minE), minI(minI), timeQ(kQ) {}
+
 	bool isSusceptible (Host const& h) { return std::get<0>(h) == 0; }
 	bool isExposed     (Host const& h) { return std::get<0>(h) == 1; }
 	bool isInfectious  (Host const& h) { return std::get<0>(h) == 2; }
 	bool hasRunCourse  (Host const& h) { return std::get<0>(h) == 3; }
 	bool isRecovered   (Host const& h) { return std::get<0>(h) == 4; }
 	bool isDeceased    (Host const& h) { return std::get<0>(h) == 5; }
-	bool detected (Host const& h) { return isInfectious(h) && std::get<1>(h) < minI; }
+	bool isDetected (Host const& h) { return isInfectious(h) && std::get<1>(h) < minI; }
 
 	void infect (Host& h)
 	{
@@ -48,7 +49,6 @@ public:
 	}
 	void worsen (Host& h)
 	{
-		//std::cerr << '.';
 		if (--std::get<1>(h) == 0) {
 			++std::get<0>(h);
 			if (hasRunCourse(h)) {
@@ -65,8 +65,8 @@ public:
 	void recover(Host& h) { std::get<0>(h) = 4; }
 	void kill   (Host& h) { std::get<0>(h) = 5; }
 
-	bool  catches()   { return pcatch(rng); }
-	bool  dies()      { return pdie(rng); }
+	bool   catches()  { return pcatch(rng); }
+	bool   dies()     { return pdie(rng); }
 	int8_t incubationPeriod() { return minE + edist(rng); }
 	int8_t infectionPeriod () { return minI + idist(rng); }
 	int8_t numNeighbors() { return 1 + ndist(rng); }
@@ -103,13 +103,18 @@ GridMap computeNext (GridMap const& m, Pathogen p)
 				p.worsen(cellnext);
 			} else if (p.isInfectious(cell)) {
 				p.worsen(cellnext);
-				if (p.detected(cell)) {
-					std::get<2>(cellnext) = 0;
-				}
+				//if (p.isDetected(cell)) {
+				//	std::get<2>(cellnext) = 0;
+				//}
 				auto hk = std::get<2>(cellnext);
-				for (auto hi = std::max(0, i - hk); hi <= std::min(i + hk, N - 1); ++hi) {
-					for (auto hj = std::max(0, j - hk); hj <= std::min(j + hk, M - 1); ++hj) {
-						auto& neighbor = m_next[hi][hj];
+				for (auto hi = i - hk; hi <= i + hk; ++hi) {
+					for (auto hj = j - hk; hj <= j + hk; ++hj) {
+						auto realj = hj;
+						auto& neighbor = m_next[
+							hi < 0 ? (N + hi) : (hi >= N ? (hi - N) : hi)
+						][
+							hj < 0 ? (M + hj) : (hj >= M ? (hj - M) : hj)
+						];
 						if (p.isSusceptible(neighbor)) {
 							if (p.catches()) {
 								p.infect(neighbor);
@@ -381,7 +386,7 @@ main( int argc, char **argv )
 
 	std::srand(std::time(nullptr));
 
-	ebola = { "Ebola-like", PT, PD, ME, KE, MI, KI, KT };
+	ebola = { "Ebola-like", PT, PD, ME, KE, MI, KI, KT, KQ };
 
 	m = { N, std::vector<Host>( N, std::make_tuple( 0, 0, 0 ) ) };
 	for (auto& row : m) {
