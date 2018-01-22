@@ -31,7 +31,7 @@ using Host = std::tuple<int8_t, int8_t, int8_t>;
 
 class Pathogen
 {
-    public:
+public:
     Pathogen(std::string name = "Ebola", double pE = 0.005, double pD = 0.5,
              int8_t minE = 2, int8_t kE = 9, int8_t minI = 7, int8_t kI = 9,
              int8_t kT = 1, int8_t kQ = 1)
@@ -41,65 +41,94 @@ class Pathogen
     {
     }
 
-    bool isSusceptible(Host const& h) { return std::get<0>(h) == 0; }
-    bool isExposed(Host const& h) { return std::get<0>(h) == 1; }
-    bool isInfectious(Host const& h) { return std::get<0>(h) == 2; }
-    bool hasRunCourse(Host const& h) { return std::get<0>(h) == 3; }
-    bool isRecovered(Host const& h) { return std::get<0>(h) == 4; }
-    bool isDeceased(Host const& h) { return std::get<0>(h) == 5; }
-    bool isDetected(Host const& h)
+    bool isSusceptible(Host const& h) const { return std::get<0>(h) == 0; }
+    bool isExposed(Host const& h) const { return std::get<0>(h) == 1; }
+    bool isInfectious(Host const& h) const { return std::get<0>(h) == 2; }
+    bool hasRunCourse(Host const& h) const { return std::get<0>(h) == 3; }
+    bool isRecovered(Host const& h) const { return std::get<0>(h) == 4; }
+    bool isDeceased(Host const& h) const { return std::get<0>(h) == 5; }
+    bool isDetected(Host const& h) const
     {
         return isInfectious(h) && std::get<1>(h) < minI;
     }
 
-    void infect(Host& h)
+    void expose(Host& h) const
+    {
+        if (catches()) infect(h);
+    }
+
+    void infect(Host& h) const
     {
         std::get<0>(h) = 1;
         std::get<1>(h) = incubationPeriod();
     }
-    void worsen(Host& h)
+
+    void expire(Host& h) const
+    {
+        if (dies())
+            kill(h);
+        else
+            recover(h);
+    }
+
+    void worsen(Host& h) const
     {
         if (--std::get<1>(h) == 0) {
             ++std::get<0>(h);
-            if (hasRunCourse(h)) {
-                if (dies()) {
-                    kill(h);
-                } else {
-                    recover(h);
-                }
-            } else {
+            if (hasRunCourse(h))
+                expire(h);
+            else
                 std::get<1>(h) = infectionPeriod();
-            }
         }
     }
-    void recover(Host& h) { std::get<0>(h) = 4; }
-    void kill(Host& h) { std::get<0>(h) = 5; }
 
-    bool   catches() { return pcatch(rng); }
-    bool   dies() { return pdie(rng); }
-    int8_t incubationPeriod() { return minE + edist(rng); }
-    int8_t infectionPeriod() { return minI + idist(rng); }
-    int8_t numNeighbors() { return 1 + ndist(rng); }
+    void recover(Host& h) const { std::get<0>(h) = 4; }
+    void kill(Host& h) const { std::get<0>(h) = 5; }
 
-    private:
+    bool   catches() const { return pcatch(rng); }
+    bool   dies() const { return pdie(rng); }
+    int8_t incubationPeriod() const { return minE + edist(rng); }
+    int8_t infectionPeriod() const { return minI + idist(rng); }
+    int8_t numNeighbors() const { return 1 + ndist(rng); }
+
+private:
     std::string         name;
     static std::mt19937 rng;
     // static std::default_random_engine rng;
-    std::bernoulli_distribution   pcatch;
-    std::bernoulli_distribution   pdie;
-    std::geometric_distribution<> edist;
-    std::geometric_distribution<> idist;
-    std::geometric_distribution<> ndist;
-    int8_t                        minE;
-    int8_t                        minI;
-    int8_t                        timeQ;
+    mutable std::bernoulli_distribution   pcatch;
+    mutable std::bernoulli_distribution   pdie;
+    mutable std::geometric_distribution<> edist;
+    mutable std::geometric_distribution<> idist;
+    mutable std::geometric_distribution<> ndist;
+    int8_t                                minE;
+    int8_t                                minI;
+    int8_t                                timeQ;
 };
 
 std::mt19937 Pathogen::rng{std::random_device()()};
 
 using GridMap = std::vector<std::vector<Host>>;
 
-GridMap computeNext(GridMap const& m, Pathogen p)
+auto getNeighbor(GridMap& m, int i, int j) -> decltype(m.front().front())
+{
+    auto N = m.size();
+    auto M = m[0].size();
+    i      = (i < 0) ? (N + i) : (i >= N ? (i - N) : i);
+    j      = (j < 0) ? (M + j) : (j >= M ? (j - M) : j);
+    return m[i][j];
+}
+
+void computeContacts(GridMap& m, Pathogen const& p, int i, int j, int k)
+{
+    for (auto hi = i - k; hi <= i + k; ++hi) {
+        for (auto hj = j - k; hj <= j + k; ++hj) {
+            auto& x = getNeighbor(m, hi, hj);
+            if (p.isSusceptible(x)) p.expose(x);
+        }
+    }
+}
+
+GridMap computeNext(GridMap const& m, Pathogen const& p)
 {
     GridMap m_next = m;
     int     N      = m.size();
@@ -109,36 +138,22 @@ GridMap computeNext(GridMap const& m, Pathogen p)
         for (auto j = 0; j < M; ++j) {
             auto& cell     = row[j];
             auto& cellnext = m_next[i][j];
-            if (p.isExposed(cell)) {
+            if (p.isExposed(cell))
                 p.worsen(cellnext);
-            } else if (p.isInfectious(cell)) {
+            else if (p.isInfectious(cell)) {
                 p.worsen(cellnext);
                 // if (p.isDetected(cell)) {
-                //	std::get<2>(cellnext) = 0;
+                //    std::get<2>(cellnext) = 0;
                 //}
-                auto hk = std::get<2>(cellnext);
-                for (auto hi = i - hk; hi <= i + hk; ++hi) {
-                    for (auto hj = j - hk; hj <= j + hk; ++hj) {
-                        auto  realj = hj;
-                        auto& neighbor =
-                            m_next[hi < 0 ? (N + hi)
-                                          : (hi >= N ? (hi - N) : hi)]
-                                  [hj < 0 ? (M + hj)
-                                          : (hj >= M ? (hj - M) : hj)];
-                        if (p.isSusceptible(neighbor)) {
-                            if (p.catches()) {
-                                p.infect(neighbor);
-                            }
-                        }
-                    }
-                }
+                auto k = std::get<2>(cellnext);
+                computeContacts(m_next, p, i, j, k);
             }
         }
     }
     return m_next;
 }
 
-void printMap(GridMap const& m, Pathogen p)
+void printMap(GridMap const& m, Pathogen const& p)
 {
     for (auto& row : m) {
         for (auto& cell : row) {
@@ -173,7 +188,7 @@ void renderMap(GridMap const& map)
     glutPostRedisplay();
 }
 
-void seedDisease(GridMap& m, Pathogen p, int count)
+void seedDisease(GridMap& m, Pathogen const& p, int count)
 {
     std::random_device rd;
     // std::mt19937 gen(rd());
@@ -188,7 +203,7 @@ void seedDisease(GridMap& m, Pathogen p, int count)
     }
 }
 
-int countInfected(GridMap const& m, Pathogen p)
+int countInfected(GridMap const& m, Pathogen const& p)
 {
     int count = 0;
     for (auto& row : m) {
@@ -201,7 +216,7 @@ int countInfected(GridMap const& m, Pathogen p)
     return count;
 }
 
-int countRecovered(GridMap const& m, Pathogen p)
+int countRecovered(GridMap const& m, Pathogen const& p)
 {
     int count = 0;
     for (auto row : m) {
@@ -214,7 +229,7 @@ int countRecovered(GridMap const& m, Pathogen p)
     return count;
 }
 
-int countDeceased(GridMap const& m, Pathogen p)
+int countDeceased(GridMap const& m, Pathogen const& p)
 {
     int count = 0;
     for (auto row : m) {
@@ -377,6 +392,23 @@ void keyboard(unsigned char key, int x, int y)
 
 int main(int argc, char** argv)
 {
+    if (argc != 13) {
+        std::cerr << "Usage:\n"
+                  << " gpathogen\n"
+                  << "   <popn-size> [1000]\n"
+                  << "   <num-steps> [1000]\n"
+                  << "   <prob-transmit> [0.035]\n"
+                  << "   <prob-death> [0.5]\n"
+                  << "   <tmin-exposed> [2]\n"
+                  << "   <tavg-exposed> [9]\n"
+                  << "   <tmin-infected> [7]\n"
+                  << "   <tavg-infected> [9]\n"
+                  << "   <num-neighbors> [1]\n"
+                  << "   <quarantine-delay> [0] (currently unused)\n"
+                  << "   <num-seeds> [1]\n"
+                  << "   <step-size> [1]\n";
+        return 1;
+    }
     unsigned const N = std::atoi(argv[1]);
     T                = std::atoi(argv[2]);
     double       PT  = std::atof(argv[3]);
@@ -385,8 +417,8 @@ int main(int argc, char** argv)
     int8_t const KE  = std::atoi(argv[6]);
     int8_t const MI  = std::atoi(argv[7]);
     int8_t const KI  = std::atoi(argv[8]);
-    int8_t const KQ  = std::atoi(argv[9]);
-    int8_t const KT  = std::atoi(argv[10]);
+    int8_t const KT  = std::atoi(argv[9]);
+    int8_t const KQ  = std::atoi(argv[10]);
     S                = std::atoi(argv[11]);
     M                = std::atoi(argv[12]);
 
