@@ -1,0 +1,6 @@
+<map id="Pathogen::expose" name="Pathogen::expose">
+<area shape="rect" id="node1" title="Possibly infect a susceptible host." alt="" coords="5,31,132,56"/>
+<area shape="rect" id="node2" href="$class_pathogen.html#a0a4d6fcf7ce91a25aa7e565006e454b3" title="Infect a host individual with this pathogen." alt="" coords="193,5,309,31"/>
+<area shape="rect" id="node4" href="$class_pathogen.html#aeace95e2855bd7b23a5e6fda5b98ca0f" title="Probabilistically determine whether an individual will contract an infection." alt="" coords="180,55,323,80"/>
+<area shape="rect" id="node3" href="$class_pathogen.html#aa5c4b6f44dabcea56d52d51d226c2212" title="Probabilistically determine the duration of incubation." alt="" coords="371,5,552,31"/>
+</map>

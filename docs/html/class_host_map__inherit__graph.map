@@ -1,0 +1,4 @@
+<map id="HostMap" name="HostMap">
+<area shape="rect" id="node1" title="Rectangular grid of host individuals along with a disease to model." alt="" coords="45,93,120,119"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,5,160,45"/>
+</map>
