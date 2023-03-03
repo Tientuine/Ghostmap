@@ -3,8 +3,10 @@
 
 //-- Static functions and data for convenience -------------------------------
 
-// Convenience container for data that must persist for the durection
-// of the entire program and also be accessible to functions.
+/// <summary>
+/// Convenience container for data that must persist for the duration
+/// of the entire program and also be accessible to functions.
+/// </summary>
 struct Scenario
 {
     static HostMap* map;
@@ -37,7 +39,9 @@ unsigned int Scenario::T;
 unsigned int Scenario::M;
 unsigned int Scenario::S;
 
-// Convenience class containing functions and data for use with OpenGL/GLUT.
+/// <summary>
+/// Convenience class containing functions and data for use with OpenGL/GLUT.
+/// </summary>
 struct VisCallbacks
 {
     static int N;
