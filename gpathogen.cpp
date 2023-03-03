@@ -1,457 +1,209 @@
-/*
-    Possible Approaches:
-    * Implicit Pathogen
-        - focus only on the state of the host
-        - SEIRD model - Susceptible/Exposed/Infected/Recovered/Deceased
-    * Implicit Host
-        - focus only on the presence/state of the pathogen
-        - APEXR model - Absent/Present/Established/eXpired/Rejected
-    * Explicit
-        - consider host as a container for pathogen
-        - Either SEIRD or blend of the two
-*/
-#include <cstdint>
-#include <ctime>
-#include <iostream>
-#include <random>
-#include <string>
-#include <tuple>
-#include <vector>
-
 #include "Angel.h"
+#include "hostmap.hpp"
 
-// Integer proxy representation - 16bits
-// storage upper-bound: 2*N Bytes
-// susceptible = 0
-// exposed = [1,kE]
-// infected = [kE+1,kE+kI]
-// recovered = -2
-// deceased = -1
-using Host = std::tuple<int8_t, int8_t, int8_t>;
+//-- Static functions and data for convenience -------------------------------
 
-class Pathogen
+// Convenience container for data that must persist for the durection
+// of the entire program and also be accessible to functions.
+struct Scenario
 {
-public:
-    Pathogen(std::string name = "Ebola", double pE = 0.005, double pD = 0.5,
-             int8_t minE = 2, int8_t kE = 9, int8_t minI = 7, int8_t kI = 9,
-             int8_t kT = 1, int8_t kQ = 1)
-        : name(name), pcatch(pE), pdie(pD), edist(1.0 / (kE - minE + 1)),
-          idist(1.0 / (kI - minI + 1)), ndist(1.0 / kT), minE(minE), minI(minI),
-          timeQ(kQ)
-    {
-    }
+    static HostMap* map;
+    static Pathogen disease;
+    static unsigned int T;
+    static unsigned int M;
+    static unsigned int S;
 
-    bool isSusceptible(Host const& h) const { return std::get<0>(h) == 0; }
-    bool isExposed(Host const& h) const { return std::get<0>(h) == 1; }
-    bool isInfectious(Host const& h) const { return std::get<0>(h) == 2; }
-    bool hasRunCourse(Host const& h) const { return std::get<0>(h) == 3; }
-    bool isRecovered(Host const& h) const { return std::get<0>(h) == 4; }
-    bool isDeceased(Host const& h) const { return std::get<0>(h) == 5; }
-    bool isDetected(Host const& h) const
+    static void runSim()
     {
-        return isInfectious(h) && std::get<1>(h) < minI;
-    }
-
-    void expose(Host& h) const
-    {
-        if (catches()) infect(h);
-    }
-
-    void infect(Host& h) const
-    {
-        std::get<0>(h) = 1;
-        std::get<1>(h) = incubationPeriod();
-    }
-
-    void expire(Host& h) const
-    {
-        if (dies())
-            kill(h);
-        else
-            recover(h);
-    }
-
-    void worsen(Host& h) const
-    {
-        if (--std::get<1>(h) == 0) {
-            ++std::get<0>(h);
-            if (hasRunCourse(h))
-                expire(h);
-            else
-                std::get<1>(h) = infectionPeriod();
+        auto t = 0u;
+        while (map->countInfected() > 0 && t++ < T) {
+            map->computeNext();
         }
-    }
-
-    void recover(Host& h) const { std::get<0>(h) = 4; }
-    void kill(Host& h) const { std::get<0>(h) = 5; }
-
-    bool   catches() const { return pcatch(rng); }
-    bool   dies() const { return pdie(rng); }
-    int8_t incubationPeriod() const { return minE + edist(rng); }
-    int8_t infectionPeriod() const { return minI + idist(rng); }
-    int8_t numNeighbors() const { return 1 + ndist(rng); }
-
-private:
-    std::string         name;
-    static std::mt19937 rng;
-    // static std::default_random_engine rng;
-    mutable std::bernoulli_distribution   pcatch;
-    mutable std::bernoulli_distribution   pdie;
-    mutable std::geometric_distribution<> edist;
-    mutable std::geometric_distribution<> idist;
-    mutable std::geometric_distribution<> ndist;
-    int8_t                                minE;
-    int8_t                                minI;
-    int8_t                                timeQ;
-};
-
-std::mt19937 Pathogen::rng{std::random_device()()};
-
-using GridMap = std::vector<std::vector<Host>>;
-
-auto getNeighbor(GridMap& m, int i, int j) -> decltype(m.front().front())
-{
-    auto N = m.size();
-    auto M = m[0].size();
-    i      = (i < 0) ? (N + i) : (i >= N ? (i - N) : i);
-    j      = (j < 0) ? (M + j) : (j >= M ? (j - M) : j);
-    return m[i][j];
-}
-
-void computeContacts(GridMap& m, Pathogen const& p, int i, int j, int k)
-{
-    for (auto hi = i - k; hi <= i + k; ++hi) {
-        for (auto hj = j - k; hj <= j + k; ++hj) {
-            auto& x = getNeighbor(m, hi, hj);
-            if (p.isSusceptible(x)) p.expose(x);
-        }
-    }
-}
-
-GridMap computeNext(GridMap const& m, Pathogen const& p)
-{
-    GridMap m_next = m;
-    int     N      = m.size();
-    int     M      = m[0].size();
-    for (auto i = 0; i < N; ++i) {
-        auto& row = m[i];
-        for (auto j = 0; j < M; ++j) {
-            auto& cell     = row[j];
-            auto& cellnext = m_next[i][j];
-            if (p.isExposed(cell))
-                p.worsen(cellnext);
-            else if (p.isInfectious(cell)) {
-                p.worsen(cellnext);
-                // if (p.isDetected(cell)) {
-                //    std::get<2>(cellnext) = 0;
-                //}
-                auto k = std::get<2>(cellnext);
-                computeContacts(m_next, p, i, j, k);
-            }
-        }
-    }
-    return m_next;
-}
-
-void printMap(GridMap const& m, Pathogen const& p)
-{
-    for (auto& row : m) {
-        for (auto& cell : row) {
-            if (p.isSusceptible(cell)) {
-                std::cout << 's';
-            } else if (p.isExposed(cell)) {
-                if (p.isInfectious(cell)) {
-                    std::cout << 'I';
-                } else {
-                    std::cout << 'e';
-                }
-            } else if (p.isDeceased(cell)) {
-                std::cout << ' ';
-            } else if (p.isRecovered(cell)) {
-                std::cout << 'R';
-            } else {
-                std::cout << '!';
-            }
-        }
+        map->print();
+        std::cout << t << std::endl;
         std::cout << std::endl;
     }
-}
 
-void renderMap(GridMap const& map)
-{
-    auto k = 0;
-    for (auto& row : map) {
-        auto n = row.size() * sizeof(Host);
-        glBufferSubData(GL_ARRAY_BUFFER, k, n, row.data());
-        k += n;
+    static void reset()
+    {
+        map->reset();
+        map->seedDisease(S);
     }
-    glutPostRedisplay();
-}
+};
 
-void seedDisease(GridMap& m, Pathogen const& p, int count)
+HostMap* Scenario::map;
+Pathogen Scenario::disease;
+unsigned int Scenario::T;
+unsigned int Scenario::M;
+unsigned int Scenario::S;
+
+// Convenience class containing functions and data for use with OpenGL/GLUT.
+struct VisCallbacks
 {
-    std::random_device rd;
-    // std::mt19937 gen(rd());
-    std::default_random_engine      gen(rd());
-    std::uniform_int_distribution<> d(0, (m.size() * m[0].size()) - 1);
-    while (count--) {
-        auto  k    = d(gen);
-        auto  i    = k / m.size();
-        auto  j    = k % m.size();
-        auto& cell = m[i][j];
-        p.infect(cell);
+    static int N;
+    static vec2* points;
+
+    static void display(void)
+    {
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDrawArrays(GL_POINTS, 0, N);
+        glutSwapBuffers();
     }
-}
 
-int countInfected(GridMap const& m, Pathogen const& p)
-{
-    int count = 0;
-    for (auto& row : m) {
-        for (auto& cell : row) {
-            if (p.isExposed(cell) || p.isInfectious(cell)) {
-                ++count;
+    static void keyboard(unsigned char key, int x, int y)
+    {
+        switch (key) {
+        case 'R':  // fall-through!
+        case 'r':
+            Scenario::reset();
+            glutTimerFunc(17, update, 0);
+            break;
+        case 033: exit(EXIT_SUCCESS); break;
+        }
+    }
+
+    static void init(int h, int w)
+    {
+        N = h * w;
+        for (auto i = 0; i < h; ++i) {
+            for (auto j = 0; j < w; ++j) {
+                points[i * w + j] =
+                    vec2(static_cast<float>(j), static_cast<float>(h - i));
             }
         }
-    }
-    return count;
-}
 
-int countRecovered(GridMap const& m, Pathogen const& p)
-{
-    int count = 0;
-    for (auto row : m) {
-        for (auto cell : row) {
-            if (p.isRecovered(cell)) {
-                ++count;
+        // Load shaders and use the resulting shader program
+        GLuint program = InitShader("vshader.glsl", "fshader.glsl");
+        glUseProgram(program);
+
+        // Display the grid using an orthographic projection
+        mat4 projection = Ortho2D(0, static_cast<GLfloat>(w), 0, static_cast<GLfloat>(h));
+        GLuint projection_loc = glGetUniformLocation(program, "projection");
+        glUniformMatrix4fv(projection_loc, 1, GL_TRUE, projection);
+
+        GLuint vao;
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+
+        GLuint pBuffer;
+        glGenBuffers(1, &pBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, pBuffer);
+        glBufferData(GL_ARRAY_BUFFER, N * sizeof(vec2), points, GL_STATIC_DRAW);
+
+        GLuint posLoc = glGetAttribLocation(program, "vPosition");
+        glEnableVertexAttribArray(posLoc);
+        glVertexAttribPointer(posLoc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+        // State attribute determines the fragment color
+        GLuint sBuffer;
+        glGenBuffers(1, &sBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, sBuffer);
+        glBufferData(GL_ARRAY_BUFFER, N * sizeof(Host), nullptr, GL_DYNAMIC_DRAW);
+
+        GLuint stateLoc = glGetAttribLocation(program, "vState");
+        glEnableVertexAttribArray(stateLoc);
+        glVertexAttribIPointer(stateLoc, 3, GL_SHORT, 0, BUFFER_OFFSET(0));
+
+        glClearColor(0.5, 0.5, 0.5, 1.0); /* gray background */
+
+        render(*Scenario::map);
+    }
+
+    static void render(HostMap const& map)
+    {
+        size_t k = 0;
+        for (auto& row : map) {
+            auto n = row.size() * sizeof(Host);
+            glBufferSubData(GL_ARRAY_BUFFER, k, n, row.data());
+            k += n;
+        }
+        glutPostRedisplay();
+    }
+
+    static void update(int dt)
+    {
+        auto t = static_cast<size_t>(dt);
+        std::cerr << ".";
+        HostMap& map = *Scenario::map;
+        if (map.countInfected() > 0 && t < Scenario::T) {
+            glutTimerFunc(17, update, static_cast<int>(t + Scenario::M));
+            for (size_t i = 0; i < Scenario::M; ++i) {
+                map.computeNext();
             }
+            render(map);
+        }
+        else if (t > 0) {
+            std::cout << "After " << t << " days...\n";
+            map.printSummary();
         }
     }
-    return count;
-}
+};
 
-int countDeceased(GridMap const& m, Pathogen const& p)
+int VisCallbacks::N;
+vec2* VisCallbacks::points = nullptr;
+
+//-- USAGE INSTRUCTIONS ------------------------------------------------------
+
+void printUsage(char* progName)
 {
-    int count = 0;
-    for (auto row : m) {
-        for (auto cell : row) {
-            if (p.isDeceased(cell)) {
-                ++count;
-            }
-        }
-    }
-    return count;
+    std::cerr << "Usage:\n"
+        << " " << progName << "\n"
+        << "   <popn-size> [1000]\n"
+        << "   <num-steps> [1000]\n"
+        << "   <prob-transmit> [0.01-0.012]\n"
+        << "   <prob-death> [0.5]\n"
+        << "   <tmin-exposed> [2]\n"
+        << "   <tavg-exposed> [9]\n"
+        << "   <tmin-infected> [7]\n"
+        << "   <tavg-infected> [9]\n"
+        << "   <num-contacts> [17]\n"
+        << "   <quarantine-delay> [0] (currently unused)\n"
+        << "   <num-seeds> [1]\n"
+        << "   <step-size> [1]\n";
 }
 
-GridMap      m;
-Pathogen     ebola;
-unsigned int T;
-unsigned int M;
-unsigned int S;
-
-void runSim()
-{
-    // printMap(m, ebola);
-    // std::cout << std::endl;
-    auto t = 0u;
-    while (countInfected(m, ebola) > 0 && t++ < T) {
-        m = computeNext(m, ebola);
-        // std::cout << i << std::endl;
-        // printMap(m, ebola);
-        // std::cerr <<
-        // "******************************************************\n";
-    }
-    printMap(m, ebola);
-    std::cout << t << std::endl;
-    std::cout << std::endl;
-
-    // std::cin.get();
-    // return 0;
-}
-
-// 0000000000000000
-// 0000000000000001
-// 0000000000011111
-// 0000001111111111
-// 1111111111111110
-// 1111111111111111
-
-// 0000111110000000 - mask for kI?
-// 0000000001111100 - mask for kE?
-
-//----------------------------------------------------------------------------
-
-vec2* points;
-int   N;
-
-void init(int h, int w)
-{
-    N = h * w;
-
-    points = new vec2[N];
-    for (auto i = 0; i < h; ++i) {
-        for (auto j = 0; j < w; ++j) {
-            points[i * w + j] =
-                vec2(static_cast<float>(j), static_cast<float>(h - i));
-        }
-    }
-
-    // Load shaders and use the resulting shader program
-    GLuint program = InitShader("vshader.glsl", "fshader.glsl");
-    glUseProgram(program);
-
-    // Create a vertex array object
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    // Create and initialize a buffer object
-    GLuint vbuffer;
-    glGenBuffers(1, &vbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
-    glBufferData(GL_ARRAY_BUFFER, N * sizeof(vec2), points, GL_STATIC_DRAW);
-
-    // Initialize the vertex position attribute from the vertex shader
-    GLuint loc = glGetAttribLocation(program, "vPosition");
-    glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-
-    GLuint sbuffer;
-    glGenBuffers(1, &sbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, sbuffer);
-    glBufferData(GL_ARRAY_BUFFER, N * sizeof(Host), nullptr, GL_DYNAMIC_DRAW);
-
-    // Initialize the vertex position attribute from the vertex shader
-    GLuint sloc = glGetAttribLocation(program, "vState");
-    glEnableVertexAttribArray(sloc);
-    glVertexAttribIPointer(sloc, 3, GL_BYTE, 0, BUFFER_OFFSET(0));
-
-    mat4   projection     = Ortho2D(0, w, 0, h);
-    GLuint projection_loc = glGetUniformLocation(program, "projection");
-    glUniformMatrix4fv(projection_loc, 1, GL_TRUE, projection);
-
-    renderMap(m);
-
-    glClearColor(0.5, 0.5, 0.5, 1.0); /* gray background */
-
-    // delete points;
-}
-
-//----------------------------------------------------------------------------
-
-void display(void)
-{
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glDrawArrays(GL_POINTS, 0, N);
-
-    glutSwapBuffers();
-}
-
-//----------------------------------------------------------------------------
-
-void update(int t)
-{
-    if (countInfected(m, ebola) > 0 && t < T) {
-        glutTimerFunc(17, update, t + M);
-        for (auto i = 0; i < M; ++i) {
-            m = computeNext(m, ebola);
-        }
-        // printMap(m, ebola);
-        renderMap(m);
-    } else if (t > 0) {
-        std::cout << "After " << t << " days...\n";
-        std::cout << countRecovered(m, ebola) << " recovered, "
-                  << countDeceased(m, ebola) << " died" << std::endl;
-    }
-}
-
-void resetMap()
-{
-    m = {m.size(), std::vector<Host>(m[0].size(), std::make_tuple(0, 0, 0))};
-    for (auto& row : m) {
-        for (auto& cell : row) {
-            std::get<2>(cell) = ebola.numNeighbors();
-        }
-    }
-    seedDisease(m, ebola, S);
-    glutTimerFunc(17, update, 0);
-}
-
-//----------------------------------------------------------------------------
-
-void keyboard(unsigned char key, int x, int y)
-{
-    switch (key) {
-    case 'R':  // fall-through!
-    case 'r': resetMap(); break;
-    case 033: exit(EXIT_SUCCESS); break;
-    }
-}
-
-//----------------------------------------------------------------------------
+//-- MAIN DRIVER ROUTINE -----------------------------------------------------
 
 int main(int argc, char** argv)
 {
     if (argc != 13) {
-        std::cerr << "Usage:\n"
-                  << " gpathogen\n"
-                  << "   <popn-size> [1000]\n"
-                  << "   <num-steps> [1000]\n"
-                  << "   <prob-transmit> [0.035]\n"
-                  << "   <prob-death> [0.5]\n"
-                  << "   <tmin-exposed> [2]\n"
-                  << "   <tavg-exposed> [9]\n"
-                  << "   <tmin-infected> [7]\n"
-                  << "   <tavg-infected> [9]\n"
-                  << "   <num-neighbors> [1]\n"
-                  << "   <quarantine-delay> [0] (currently unused)\n"
-                  << "   <num-seeds> [1]\n"
-                  << "   <step-size> [1]\n";
+        printUsage(argv[0]);
         return 1;
     }
+
     unsigned const N = std::atoi(argv[1]);
-    T                = std::atoi(argv[2]);
-    double       PT  = std::atof(argv[3]);
-    double       PD  = std::atof(argv[4]);
-    int8_t const ME  = std::atoi(argv[5]);
-    int8_t const KE  = std::atoi(argv[6]);
-    int8_t const MI  = std::atoi(argv[7]);
-    int8_t const KI  = std::atoi(argv[8]);
-    int8_t const KT  = std::atoi(argv[9]);
-    int8_t const KQ  = std::atoi(argv[10]);
-    S                = std::atoi(argv[11]);
-    M                = std::atoi(argv[12]);
+    Scenario::T = std::atoi(argv[2]);
+    double PT = std::atof(argv[3]);
+    double PD = std::atof(argv[4]);
+    int8_t const ME = (int8_t)std::atoi(argv[5]);
+    int8_t const KE = (int8_t)std::atoi(argv[6]);
+    int8_t const MI = (int8_t)std::atoi(argv[7]);
+    int8_t const KI = (int8_t)std::atoi(argv[8]);
+    int8_t const KT = (int8_t)std::atoi(argv[9]);
+    int8_t const KQ = (int8_t)std::atoi(argv[10]);
+    Scenario::S = std::atoi(argv[11]);
+    Scenario::M = std::atoi(argv[12]);
 
-    std::srand(std::time(nullptr));
-
-    ebola = {"Ebola-like", PT, PD, ME, KE, MI, KI, KT, KQ};
-
-    m = {N, std::vector<Host>(N, std::make_tuple(0, 0, 0))};
-    for (auto& row : m) {
-        for (auto& cell : row) {
-            std::get<2>(cell) = ebola.numNeighbors();
-        }
-    }
-
-    seedDisease(m, ebola, S);
+    HostMap map({ "Ebola-like", PT, PD, ME, KE, MI, KI, KT, KQ }, N, N);
+    Scenario::map = &map;
+    map.seedDisease(Scenario::S);
 
     std::cerr << "Press 1 for Console (otherwise load GUI): ";
     if (std::cin.get() == '1') {
         auto t = 0u;
-        while (countInfected(m, ebola) > 0 && t++ < T) {
-            m = computeNext(m, ebola);
+        while (map.countInfected() > 0 && t++ < Scenario::T) {
+            map.computeNext();
             std::cerr << '.';
         }
         std::cerr << '\n';
-        printMap(m, ebola);
-        std::cout << "After " << t
-                  << " days...\n";  //(" << NCOMPS << ',' << NRANDS << ")\n";
-        std::cout << countRecovered(m, ebola) << " recovered, "
-                  << countDeceased(m, ebola) << " died" << std::endl;
-    } else {
+        map.print();
+        std::cout << "\nAfter " << t << " days...\n";
+        map.printSummary();
+    }
+    else {
         glutInit(&argc, argv);
         glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-        glutInitWindowSize(N, N);
+        glutInitWindowSize(static_cast<int>(map.row_count()), static_cast<int>(map.col_count()));
         glutInitContextVersion(3, 2);
         glutInitContextProfile(GLUT_CORE_PROFILE);
         glutCreateWindow("Ghostmap");
@@ -459,13 +211,16 @@ int main(int argc, char** argv)
         glewExperimental = GL_TRUE;
         glewInit();
 
-        init(N, N);
-
-        glutDisplayFunc(display);
-        glutKeyboardFunc(keyboard);
-        glutTimerFunc(17, update, 0);
+        vec2* points = new vec2[N * N];
+        VisCallbacks::points = points;
+        VisCallbacks::init(static_cast<int>(map.row_count()), static_cast<int>(map.col_count()));
+        glutDisplayFunc(VisCallbacks::display);
+        glutKeyboardFunc(VisCallbacks::keyboard);
+        glutTimerFunc(17, VisCallbacks::update, 0);
 
         glutMainLoop();
+
+        delete[] points;
     }
     return 0;
 }
