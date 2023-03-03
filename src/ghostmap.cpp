@@ -73,7 +73,7 @@ struct VisCallbacks
         }
 
         // Load shaders and use the resulting shader program
-        GLuint program = InitShader("vshader.glsl", "fshader.glsl");
+        GLuint program = InitShader("shaders/vshader.glsl", "shaders/fshader.glsl");
         glUseProgram(program);
 
         // Display the grid using an orthographic projection

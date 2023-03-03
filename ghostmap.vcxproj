@@ -123,10 +123,6 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ghostmap.cpp" />
-    <ClCompile Include="InitShader.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="glmatrix.hpp" />
     <ClInclude Include="include\Angel.h" />
     <ClInclude Include="include\CheckError.h" />
@@ -135,6 +131,10 @@
     <ClInclude Include="include\pathogen.hpp" />
     <ClInclude Include="include\vec.h" />
     <ClInclude Include="temp.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\ghostmap.cpp" />
+    <ClCompile Include="src\InitShader.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
