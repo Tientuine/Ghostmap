@@ -1,5 +1,6 @@
 name: Doxygen GitHub Pages Deploy Action
 
+
 on:
   push:
     branches:
@@ -9,11 +10,20 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      id-token: write
+      pages: write
+
     steps:
-      - uses: DenverCoder1/doxygen-github-pages-action@v1.2.0
+      - uses: ./.github/actions/doxygen-github-pages
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           folder: docs
           config_file: Doxyfile
+      - name: Move nojekyll
+        run: mv docs/.nojekyll docs/api/.nojekyll
+        shell: bash
 
