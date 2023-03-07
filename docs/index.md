@@ -2,7 +2,7 @@
 
 Simulation and visualization of disease spread based on stochastic epidemiological models.
 
-- [API Documentation](./docs/html/)
+- [API Documentation](./api/)
 
 ## Build Dependencies
 

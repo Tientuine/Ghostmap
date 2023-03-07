@@ -17,13 +17,15 @@ jobs:
       pages: write
 
     steps:
-      - uses: ./.github/actions/doxygen-github-pages
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: "true"
+      - name: Doxygen build and deploy
+        uses: ./.github/actions/doxygen-github-pages
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           folder: docs
           config_file: Doxyfile
-      - name: Move nojekyll
-        run: mv docs/.nojekyll docs/api/.nojekyll
-        shell: bash
 
