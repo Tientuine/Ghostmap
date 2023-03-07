@@ -1,6 +1,0 @@
-<map id="Pathogen::expire" name="Pathogen::expire">
-<area shape="rect" id="node1" title="Resolve an infection in a host." alt="" coords="5,56,136,83"/>
-<area shape="rect" id="node2" href="$classPathogen.html#acdd1407d4e153e32bafcc3b9f495d451" title="Succumb the host to the infection." alt="" coords="199,5,309,32"/>
-<area shape="rect" id="node3" href="$classPathogen.html#a496955df44a7e51cbcfc963b3e717f4e" title="Survive the infection." alt="" coords="185,56,323,83"/>
-<area shape="rect" id="node4" href="$classPathogen.html#a5935229483ec62b02904490af46af905" title="Probabilistically determine whether an individual will die from infection." alt="" coords="184,107,324,133"/>
-</map>

@@ -1,6 +1,0 @@
-<map id="HostMap::reset" name="HostMap::reset">
-<area shape="rect" id="node1" title="Resets the data for all hosts in the map." alt="" coords="496,5,617,32"/>
-<area shape="rect" id="node2" href="$structScenario.html#af1030b893c1dc720cd8ac5c8f0791ec0" title=" " alt="" coords="329,5,448,32"/>
-<area shape="rect" id="node3" href="$structVisCallbacks.html#aaf2aa08ebcbd4a3321645dbf94b0f925" title=" " alt="" coords="108,5,281,32"/>
-<area shape="rect" id="node4" href="$ghostmap_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,5,60,32"/>
-</map>

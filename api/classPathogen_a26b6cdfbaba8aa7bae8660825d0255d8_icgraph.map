@@ -1,8 +1,0 @@
-<map id="Pathogen::numNeighbors" name="Pathogen::numNeighbors">
-<area shape="rect" id="node1" title="Probabilistically determine the size of the contact neighborhood for a host." alt="" coords="691,31,876,57"/>
-<area shape="rect" id="node2" href="$classHostMap.html#a8572aed23385444cff7a69d26ac9de1c" title="Initialize this map with the specified dimensions and disease" alt="" coords="496,5,643,32"/>
-<area shape="rect" id="node3" href="$classHostMap.html#a7207fcaf7c0d0d1f7ed2630be21a284b" title="Resets the data for all hosts in the map." alt="" coords="509,56,630,83"/>
-<area shape="rect" id="node4" href="$structScenario.html#af1030b893c1dc720cd8ac5c8f0791ec0" title=" " alt="" coords="329,56,448,83"/>
-<area shape="rect" id="node5" href="$structVisCallbacks.html#aaf2aa08ebcbd4a3321645dbf94b0f925" title=" " alt="" coords="108,56,281,83"/>
-<area shape="rect" id="node6" href="$ghostmap_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,56,60,83"/>
-</map>

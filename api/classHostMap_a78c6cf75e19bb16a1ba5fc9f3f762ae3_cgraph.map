@@ -1,4 +1,0 @@
-<map id="HostMap::countRecovered" name="HostMap::countRecovered">
-<area shape="rect" id="node1" title="Count the number of recovered individuals." alt="" coords="5,5,199,32"/>
-<area shape="rect" id="node2" href="$classPathogen.html#a0cb6798af84c9a5426aed9b396dba535" title="Indicates that an individual has recovered with immunity." alt="" coords="247,5,417,32"/>
-</map>

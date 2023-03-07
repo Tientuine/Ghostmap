@@ -1,8 +1,0 @@
-<map id="HostMap::print" name="HostMap::print">
-<area shape="rect" id="node1" title="Print a text representation of the map to standard output." alt="" coords="5,107,124,133"/>
-<area shape="rect" id="node2" href="$classPathogen.html#a8d9cec61631f1c8e38380fba42596686" title="Indicates that an individual succumbed to the infection." alt="" coords="177,5,343,32"/>
-<area shape="rect" id="node3" href="$classPathogen.html#a1e0938763f6939e652b06987e76b73cc" title="Indicates that an individual has been exposed and may be incubating the pathogen." alt="" coords="182,56,338,83"/>
-<area shape="rect" id="node4" href="$classPathogen.html#a2ff776a9d9345843f2d587d3f58c0171" title="Indicates whether an individual may spread the pathogen." alt="" coords="177,107,343,133"/>
-<area shape="rect" id="node5" href="$classPathogen.html#a0cb6798af84c9a5426aed9b396dba535" title="Indicates that an individual has recovered with immunity." alt="" coords="175,157,345,184"/>
-<area shape="rect" id="node6" href="$classPathogen.html#a1f4666a9356e744915d9577212f81225" title="Indicates that an individual may contract the pathogen if exposed." alt="" coords="172,208,348,235"/>
-</map>

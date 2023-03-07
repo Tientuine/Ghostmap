@@ -1,4 +1,0 @@
-<map id="HostMap::HostMap" name="HostMap::HostMap">
-<area shape="rect" id="node1" title="Initialize this map with the specified dimensions and disease" alt="" coords="5,5,152,32"/>
-<area shape="rect" id="node2" href="$classPathogen.html#a26b6cdfbaba8aa7bae8660825d0255d8" title="Probabilistically determine the size of the contact neighborhood for a host." alt="" coords="200,5,385,32"/>
-</map>
