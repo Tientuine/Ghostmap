@@ -1,0 +1,10 @@
+<map id="Scenario::reset" name="Scenario::reset">
+<area shape="rect" id="node1" title=" " alt="" coords="5,56,124,83"/>
+<area shape="rect" id="node2" href="$classHostMap.html#a7207fcaf7c0d0d1f7ed2630be21a284b" title="Resets the data for all hosts in the map." alt="" coords="197,19,318,45"/>
+<area shape="rect" id="node4" href="$classHostMap.html#ae8c5a36fb208c6946127049ca1be4b09" title="Plant the disease in a given number of individuals (i.e., &quot;patient zero&quot; candidates)." alt="" coords="172,81,343,108"/>
+<area shape="rect" id="node3" href="$classPathogen.html#a26b6cdfbaba8aa7bae8660825d0255d8" title="Probabilistically determine the size of the contact neighborhood for a host." alt="" coords="391,5,576,32"/>
+<area shape="rect" id="node5" href="$classHostMap.html#a575c3ab3b93b1abf8db24d6e21683788" title="Width of the the map." alt="" coords="408,56,559,83"/>
+<area shape="rect" id="node6" href="$classPathogen.html#a0a4d6fcf7ce91a25aa7e565006e454b3" title="Infect a host individual with this pathogen." alt="" coords="420,107,547,133"/>
+<area shape="rect" id="node8" href="$classHostMap.html#ab536306d1398e6efe8f01aa1103f2751" title="Height of the the map." alt="" coords="406,157,561,184"/>
+<area shape="rect" id="node7" href="$classPathogen.html#aa5c4b6f44dabcea56d52d51d226c2212" title="Probabilistically determine the duration of incubation." alt="" coords="624,107,823,133"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="HostMap::printSummary" name="HostMap::printSummary">
+<area shape="rect" id="node1" title="Print aggregate totals for the map so far." alt="" coords="5,69,187,96"/>
+<area shape="rect" id="node2" href="$classHostMap.html#affad330931146f57a90337b0bb63b857" title="Count the number of deceased individuals." alt="" coords="237,12,425,39"/>
+<area shape="rect" id="node4" href="$classHostMap.html#a5c17f50a04a5343e95e1025a3467a725" title="Count the number of active infections." alt="" coords="243,69,420,96"/>
+<area shape="rect" id="node7" href="$classHostMap.html#a78c6cf75e19bb16a1ba5fc9f3f762ae3" title="Count the number of recovered individuals." alt="" coords="235,132,428,159"/>
+<area shape="rect" id="node3" href="$classPathogen.html#a8d9cec61631f1c8e38380fba42596686" title="Indicates that an individual succumbed to the infection." alt="" coords="479,5,644,32"/>
+<area shape="rect" id="node5" href="$classPathogen.html#a1e0938763f6939e652b06987e76b73cc" title="Indicates that an individual has been exposed and may be incubating the pathogen." alt="" coords="483,56,639,83"/>
+<area shape="rect" id="node6" href="$classPathogen.html#a2ff776a9d9345843f2d587d3f58c0171" title="Indicates whether an individual may spread the pathogen." alt="" coords="479,107,644,133"/>
+<area shape="rect" id="node8" href="$classPathogen.html#a0cb6798af84c9a5426aed9b396dba535" title="Indicates that an individual has recovered with immunity." alt="" coords="476,157,647,184"/>
+</map>

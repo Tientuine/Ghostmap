@@ -1,0 +1,5 @@
+<map id="HostMap::getNeighbor" name="HostMap::getNeighbor">
+<area shape="rect" id="node1" title="Provides a view of the grid as a torus topology." alt="" coords="5,31,173,57"/>
+<area shape="rect" id="node2" href="$classHostMap.html#a575c3ab3b93b1abf8db24d6e21683788" title="Width of the the map." alt="" coords="223,5,374,32"/>
+<area shape="rect" id="node3" href="$classHostMap.html#ab536306d1398e6efe8f01aa1103f2751" title="Height of the the map." alt="" coords="221,56,376,83"/>
+</map>

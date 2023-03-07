@@ -1,5 +1,0 @@
-<map id="HostMap::countInfected" name="HostMap::countInfected">
-<area shape="rect" id="node1" title="Count the number of active infections." alt="" coords="5,31,164,56"/>
-<area shape="rect" id="node2" href="$class_pathogen.html#a1e0938763f6939e652b06987e76b73cc" title="Indicates that an individual has been exposed and may be incubating the pathogen." alt="" coords="214,5,361,31"/>
-<area shape="rect" id="node3" href="$class_pathogen.html#a2ff776a9d9345843f2d587d3f58c0171" title="Indicates whether an individual may spread the pathogen." alt="" coords="212,55,363,80"/>
-</map>

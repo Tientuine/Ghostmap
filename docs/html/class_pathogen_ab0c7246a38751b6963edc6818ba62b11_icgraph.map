@@ -1,9 +1,0 @@
-<map id="Pathogen::hasRunCourse" name="Pathogen::hasRunCourse">
-<area shape="rect" id="node1" title="Indicates that an infection has run its course for a given individual." alt="" coords="885,43,1056,68"/>
-<area shape="rect" id="node2" href="$class_pathogen.html#afabe3245bf5726110aae92c62ec066dc" title="Advance the infection by one day." alt="" coords="711,43,837,68"/>
-<area shape="rect" id="node3" href="$class_host_map.html#aa3501b72ba17cb80b2fb6443f6b2c1c4" title="Advance the simulation one time step (i.e., day)." alt="" coords="504,43,663,68"/>
-<area shape="rect" id="node4" href="$struct_scenario.html#abc46df5d62ecd11e0785269f711dbc78" title=" " alt="" coords="322,5,445,31"/>
-<area shape="rect" id="node5" href="$struct_vis_callbacks.html#a400e5a4c350ac8482c810d8000fd22de" title=" " alt="" coords="311,79,456,104"/>
-<area shape="rect" id="node6" href="$struct_vis_callbacks.html#aaf2aa08ebcbd4a3321645dbf94b0f925" title=" " alt="" coords="104,53,263,79"/>
-<area shape="rect" id="node7" href="$ghostmap_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,79,56,104"/>
-</map>

@@ -1,4 +1,0 @@
-<map id="Pathogen::isDetected" name="Pathogen::isDetected">
-<area shape="rect" id="node1" title="Indicates whether an individual is presenting symptoms." alt="" coords="5,5,152,31"/>
-<area shape="rect" id="node2" href="$class_pathogen.html#a2ff776a9d9345843f2d587d3f58c0171" title="Indicates whether an individual may spread the pathogen." alt="" coords="200,5,351,31"/>
-</map>

@@ -1,0 +1,4 @@
+<map id="Pathogen::infect" name="Pathogen::infect">
+<area shape="rect" id="node1" title="Infect a host individual with this pathogen." alt="" coords="5,5,132,32"/>
+<area shape="rect" id="node2" href="$classPathogen.html#aa5c4b6f44dabcea56d52d51d226c2212" title="Probabilistically determine the duration of incubation." alt="" coords="180,5,379,32"/>
+</map>

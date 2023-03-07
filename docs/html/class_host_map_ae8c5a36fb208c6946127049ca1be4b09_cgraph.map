@@ -1,7 +1,0 @@
-<map id="HostMap::seedDisease" name="HostMap::seedDisease">
-<area shape="rect" id="node1" title="Plant the disease in a given number of individuals (i.e., &quot;patient zero&quot; candidates)." alt="" coords="5,55,163,80"/>
-<area shape="rect" id="node2" href="$class_host_map.html#a575c3ab3b93b1abf8db24d6e21683788" title="Width of the the map." alt="" coords="212,5,351,31"/>
-<area shape="rect" id="node3" href="$class_pathogen.html#a0a4d6fcf7ce91a25aa7e565006e454b3" title="Infect a host individual with this pathogen." alt="" coords="223,55,339,80"/>
-<area shape="rect" id="node5" href="$class_host_map.html#ab536306d1398e6efe8f01aa1103f2751" title="Height of the the map." alt="" coords="211,104,352,129"/>
-<area shape="rect" id="node4" href="$class_pathogen.html#aa5c4b6f44dabcea56d52d51d226c2212" title="Probabilistically determine the duration of incubation." alt="" coords="400,55,581,80"/>
-</map>

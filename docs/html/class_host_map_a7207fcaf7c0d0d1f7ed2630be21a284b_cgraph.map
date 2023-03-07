@@ -1,4 +1,0 @@
-<map id="HostMap::reset" name="HostMap::reset">
-<area shape="rect" id="node1" title="Resets the data for all hosts in the map." alt="" coords="5,5,116,31"/>
-<area shape="rect" id="node2" href="$class_pathogen.html#a26b6cdfbaba8aa7bae8660825d0255d8" title="Probabilistically determine the size of the contact neighborhood for a host." alt="" coords="164,5,332,31"/>
-</map>

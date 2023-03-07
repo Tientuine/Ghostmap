@@ -1,9 +1,0 @@
-<map id="Pathogen::worsen" name="Pathogen::worsen">
-<area shape="rect" id="node1" title="Advance the infection by one day." alt="" coords="5,104,132,129"/>
-<area shape="rect" id="node2" href="$class_pathogen.html#a6dcb897a1fc450298dc2f1b310c9259f" title="Resolve an infection in a host." alt="" coords="205,55,325,80"/>
-<area shape="rect" id="node6" href="$class_pathogen.html#ab0c7246a38751b6963edc6818ba62b11" title="Indicates that an infection has run its course for a given individual." alt="" coords="180,104,351,129"/>
-<area shape="rect" id="node7" href="$class_pathogen.html#a8ad1d6dfedf0ebdac57fccf883ca1461" title="Probabilistically determine the duration of infection." alt="" coords="180,153,351,179"/>
-<area shape="rect" id="node3" href="$class_pathogen.html#acdd1407d4e153e32bafcc3b9f495d451" title="Succumb the host to the infection." alt="" coords="411,5,513,31"/>
-<area shape="rect" id="node4" href="$class_pathogen.html#a496955df44a7e51cbcfc963b3e717f4e" title="Survive the infection." alt="" coords="399,55,525,80"/>
-<area shape="rect" id="node5" href="$class_pathogen.html#a5935229483ec62b02904490af46af905" title="Probabilistically determine whether an individual will die from infection." alt="" coords="399,104,525,129"/>
-</map>

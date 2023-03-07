@@ -1,0 +1,10 @@
+<map id="Pathogen::isDeceased" name="Pathogen::isDeceased">
+<area shape="rect" id="node1" title="Indicates that an individual succumbed to the infection." alt="" coords="1001,56,1167,83"/>
+<area shape="rect" id="node2" href="$classHostMap.html#affad330931146f57a90337b0bb63b857" title="Count the number of deceased individuals." alt="" coords="765,31,953,57"/>
+<area shape="rect" id="node7" href="$classHostMap.html#a8337a2061a28adc51826c357b238c2c0" title="Print a text representation of the map to standard output." alt="" coords="800,81,919,108"/>
+<area shape="rect" id="node3" href="$classHostMap.html#a6fa6a3a0a36797702a414b3306317f9e" title="Print aggregate totals for the map so far." alt="" coords="536,31,717,57"/>
+<area shape="rect" id="node4" href="$structVisCallbacks.html#a400e5a4c350ac8482c810d8000fd22de" title=" " alt="" coords="329,31,488,57"/>
+<area shape="rect" id="node5" href="$structVisCallbacks.html#aaf2aa08ebcbd4a3321645dbf94b0f925" title=" " alt="" coords="108,5,281,32"/>
+<area shape="rect" id="node6" href="$ghostmap_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,31,60,57"/>
+<area shape="rect" id="node8" href="$structScenario.html#abc46df5d62ecd11e0785269f711dbc78" title=" " alt="" coords="561,81,693,108"/>
+</map>
