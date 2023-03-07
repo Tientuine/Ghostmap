@@ -1,0 +1,26 @@
+<map id="Scenario::runSim" name="Scenario::runSim">
+<area shape="rect" id="node1" title=" " alt="" coords="5,321,137,348"/>
+<area shape="rect" id="node2" href="$classHostMap.html#aa3501b72ba17cb80b2fb6443f6b2c1c4" title="Advance the simulation one time step (i.e., day)." alt="" coords="186,259,362,285"/>
+<area shape="rect" id="node21" href="$classHostMap.html#a5c17f50a04a5343e95e1025a3467a725" title="Count the number of active infections." alt="" coords="185,321,363,348"/>
+<area shape="rect" id="node22" href="$classHostMap.html#a8337a2061a28adc51826c357b238c2c0" title="Print a text representation of the map to standard output." alt="" coords="215,397,333,424"/>
+<area shape="rect" id="node3" href="$classHostMap.html#a575c3ab3b93b1abf8db24d6e21683788" title="Width of the the map." alt="" coords="899,208,1050,235"/>
+<area shape="rect" id="node4" href="$classHostMap.html#a905b52821d5a97161974e406a738451d" title="Identify and potentially infect the close contacts of individual (i,j)." alt="" coords="411,259,613,285"/>
+<area shape="rect" id="node10" href="$classHostMap.html#ab536306d1398e6efe8f01aa1103f2751" title="Height of the the map." alt="" coords="897,259,1052,285"/>
+<area shape="rect" id="node12" href="$classPathogen.html#a1e0938763f6939e652b06987e76b73cc" title="Indicates that an individual has been exposed and may be incubating the pathogen." alt="" coords="434,360,590,387"/>
+<area shape="rect" id="node13" href="$classPathogen.html#a2ff776a9d9345843f2d587d3f58c0171" title="Indicates whether an individual may spread the pathogen." alt="" coords="429,309,595,336"/>
+<area shape="rect" id="node14" href="$classPathogen.html#afabe3245bf5726110aae92c62ec066dc" title="Advance the infection by one day." alt="" coords="443,81,581,108"/>
+<area shape="rect" id="node5" href="$classPathogen.html#aa2afc79f16c1bc2cd1eab82417a32fec" title="Possibly infect a susceptible host." alt="" coords="687,309,824,336"/>
+<area shape="rect" id="node9" href="$classHostMap.html#ad15529657156ec805614ca9c53c3c544" title="Provides a view of the grid as a torus topology." alt="" coords="671,259,839,285"/>
+<area shape="rect" id="node11" href="$classPathogen.html#a1f4666a9356e744915d9577212f81225" title="Indicates that an individual may contract the pathogen if exposed." alt="" coords="667,385,843,412"/>
+<area shape="rect" id="node6" href="$classPathogen.html#a0a4d6fcf7ce91a25aa7e565006e454b3" title="Infect a host individual with this pathogen." alt="" coords="911,309,1038,336"/>
+<area shape="rect" id="node8" href="$classPathogen.html#aeace95e2855bd7b23a5e6fda5b98ca0f" title="Probabilistically determine whether an individual will contract an infection." alt="" coords="897,360,1052,387"/>
+<area shape="rect" id="node7" href="$classPathogen.html#aa5c4b6f44dabcea56d52d51d226c2212" title="Probabilistically determine the duration of incubation." alt="" coords="1100,309,1299,336"/>
+<area shape="rect" id="node15" href="$classPathogen.html#a6dcb897a1fc450298dc2f1b310c9259f" title="Resolve an infection in a host." alt="" coords="690,107,821,133"/>
+<area shape="rect" id="node19" href="$classPathogen.html#ab0c7246a38751b6963edc6818ba62b11" title="Indicates that an infection has run its course for a given individual." alt="" coords="664,5,847,32"/>
+<area shape="rect" id="node20" href="$classPathogen.html#a8ad1d6dfedf0ebdac57fccf883ca1461" title="Probabilistically determine the duration of infection." alt="" coords="661,56,849,83"/>
+<area shape="rect" id="node16" href="$classPathogen.html#acdd1407d4e153e32bafcc3b9f495d451" title="Succumb the host to the infection." alt="" coords="919,107,1030,133"/>
+<area shape="rect" id="node17" href="$classPathogen.html#a496955df44a7e51cbcfc963b3e717f4e" title="Survive the infection." alt="" coords="905,157,1044,184"/>
+<area shape="rect" id="node18" href="$classPathogen.html#a5935229483ec62b02904490af46af905" title="Probabilistically determine whether an individual will die from infection." alt="" coords="905,56,1045,83"/>
+<area shape="rect" id="node23" href="$classPathogen.html#a8d9cec61631f1c8e38380fba42596686" title="Indicates that an individual succumbed to the infection." alt="" coords="429,512,595,539"/>
+<area shape="rect" id="node24" href="$classPathogen.html#a0cb6798af84c9a5426aed9b396dba535" title="Indicates that an individual has recovered with immunity." alt="" coords="427,461,597,488"/>
+</map>
