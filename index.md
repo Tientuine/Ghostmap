@@ -2,8 +2,6 @@
 
 Simulation and visualization of disease spread based on stochastic epidemiological models.
 
-This project is a work in progress.
-
 - [API Documentation](./docs/html/)
 
 ## Build Dependencies
