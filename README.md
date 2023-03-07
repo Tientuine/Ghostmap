@@ -2,6 +2,8 @@
 
 Simulation and visualization of disease spread based on stochastic epidemiological models.
 
+This project is a work in progress.
+
 - [GitHub Pages Site (includes API documentation)](https://tientuine.github.io/Ghostmap/)
 
 ## Build Dependencies
