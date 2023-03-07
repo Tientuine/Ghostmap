@@ -44,7 +44,7 @@ unsigned int Scenario::S;
 /// </summary>
 struct VisCallbacks
 {
-    static int N;
+    static long N;
     static vec2* points;
 
     static void display(void)
@@ -143,7 +143,7 @@ struct VisCallbacks
     }
 };
 
-int VisCallbacks::N;
+long VisCallbacks::N;
 vec2* VisCallbacks::points = nullptr;
 
 //-- USAGE INSTRUCTIONS ------------------------------------------------------
@@ -175,7 +175,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    unsigned const N = std::atoi(argv[1]);
+    long const N = std::atoi(argv[1]);
     Scenario::T = std::atoi(argv[2]);
     double PT = std::atof(argv[3]);
     double PD = std::atof(argv[4]);
