@@ -28,4 +28,5 @@ jobs:
           branch: gh-pages
           folder: docs
           config_file: Doxyfile
+          dest_repo: Tientuine/awesomespaceadventure.git
 

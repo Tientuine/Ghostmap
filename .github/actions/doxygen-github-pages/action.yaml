@@ -21,6 +21,9 @@ inputs:
     description: 'Path of the Doxygen configuration file'
     required: true
     default: "Doxyfile"
+  dest_repo:
+    description: 'Repository URL where to deploy API docs'
+    required: true
 
 runs:
   using: "composite"
@@ -41,6 +44,21 @@ runs:
     - name: Create .nojekyll (ensures pages with underscores work on gh pages)
       run: touch ${{ inputs.folder }}/api/.nojekyll
       shell: bash
+
+    - name: Copy and deploy to destination repo
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: |
+        git config --unset-all http.https://github.com/.extraheader
+        git config --global user.name 'Matthew A Johnson'
+        git config --global user.email '1669148+Tientuine@users.noreply.github.com'
+        git clone https://tientuine:$GITHUB_TOKEN@github.com/${{ inputs.dest_repo }} dest_repo
+        cp -a ${{ inputs.folder }} dest_repo
+        cd dest_repo
+        git add ${{ inputs.folder }}
+        git commit -m 'Update API docs'
+        git push
 
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@v4
